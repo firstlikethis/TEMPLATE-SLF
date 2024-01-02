@@ -1,0 +1,288 @@
+package com.pccth.utils;
+
+import java.io.*;
+import java.sql.*;
+import javax.sql.*;
+import javax.naming.*;
+
+/**
+ * Store database utils
+ * @version 1.00 25 Mar 2002
+ * @author Prawith Thowphant
+ */
+public class DBUtil {
+	public static String schemaSlfMaster = PccProperties.getResourceString("SCHEMA_SLF_MASTER");
+	public static String schemaSlfSso = PccProperties.getResourceString("SCHEMA_SLF_SSO");
+	public static String schemaSlf = PccProperties.getResourceString("SCHEMA_SLF");
+	public static String schemaMaster = PccProperties.getResourceString("SCHEMA_MASTER");
+	public static String txt_path = PccProperties.getResourceString("TXT_PATH");
+
+	private DBUtil ( ) {
+	}
+
+	/**
+	* Connect to Database.
+	* @return Connection
+	*/
+	public static Connection getConnection( ) {
+		return getConnection(false);		
+	}
+
+	/**
+	* Connect to Database.
+	* @return Connection
+	*/
+	public static Connection getConnection(boolean autoCommit) {
+		String dataSourceName = null;
+		Connection conn = null;
+		try {
+			/*
+			* Get the DataSource Name
+			*/
+			dataSourceName = PccProperties.getResourceString("DataSource");
+			String pool = PccProperties.getResourceString("Pool");
+			
+			if (pool.compareToIgnoreCase("yes") == 0)
+				conn = getConnectionViaPool(autoCommit, dataSourceName);	
+			else
+				conn = getConnectionViaDriverManager(autoCommit);		
+		} catch (FileNotFoundException fe) {
+			System.out.println("FileNotFoundException while loading Properties : \n" + fe.getMessage());
+        } catch(NamingException ne) {
+            System.out.println("NamingException while looking up DataSource Connection " + dataSourceName + ": \n" + ne.getMessage());
+		} catch (SQLException se) { 
+			System.out.println("SQLExcpetion while getting DB Connection : \n" + se.getMessage());
+		} catch (IOException ioe) {
+			System.out.println("IOException Error ---> " + ioe.getMessage());
+		} catch (Exception e) {
+			System.out.println("Exception Error ---> " + e.getMessage());
+		} 
+		return conn;
+	}
+
+	/**
+	* Connect to Database via Connection Pool.
+	* @param autoCommit True or False
+	* @return Connection
+	*/
+	private static Connection getConnectionViaPool(boolean autoCommit, String dataSourceName)
+		throws NamingException, SQLException, Exception {
+		DataSource ds = null;
+		Connection conn = null;
+
+		/*
+		* Create the intitial naming context.
+		* The command bean will use the naming
+		* service to get access to a DataSource
+		* object setup using the WebSphere
+		* Administrator's Console
+		*/
+        InitialContext ctx = new InitialContext();
+
+		/*
+		* Get the DataSource Object
+		*/	
+		ds = (DataSource) ctx.lookup(dataSourceName);
+	
+		/*
+		* Log in as the default user
+		*/
+		conn = ds.getConnection();
+		conn.setAutoCommit(autoCommit);
+
+		return conn;
+	}
+
+	/**
+	* Connect to Database via DriverManager.
+	* @param autoCommit True or False
+	* @return Connection
+	*/
+    private static Connection getConnectionViaDriverManager(boolean autoCommit)
+    	throws SQLException, Exception {
+		Connection conn = null; 
+
+		try{
+			Class.forName(PccProperties.getResourceString("DBDriver"));
+			conn = DriverManager.getConnection(	PccProperties.getResourceString("Database"),
+												PccProperties.getResourceString("UserId"),
+												PccProperties.getResourceString("Password"));
+			conn.setAutoCommit(autoCommit);
+		}catch(Exception e){
+			System.out.println("Connection Error : " + e);
+		}
+		return conn;
+	}
+
+	/**
+	* Connect to Database.
+	* @return Connection
+	*/
+	public static Connection getConnectionICL(boolean autoCommit) {
+		String dataSourceName = null;
+		Connection conn = null;
+		try {
+			/*
+			* Get the DataSource Name
+			*/
+			dataSourceName = PccProperties.getResourceString("DataSourceICL");
+			String pool = PccProperties.getResourceString("Pool");
+			
+			if (pool.compareToIgnoreCase("yes") == 0)
+				conn = getConnectionViaPoolICL(autoCommit, dataSourceName);	
+			else
+				conn = getConnectionViaDriverManagerICL(autoCommit);		
+		} catch (FileNotFoundException fe) {
+			System.out.println("FileNotFoundException while loading Properties : \n" + fe.getMessage());
+		} catch(NamingException ne) {
+			System.out.println("NamingException while looking up DataSource Connection " + dataSourceName + ": \n" + ne.getMessage());
+		} catch (SQLException se) { 
+			System.out.println("SQLExcpetion while getting DB Connection : \n" + se.getMessage());
+		} catch (IOException ioe) {
+			System.out.println("IOException Error ---> " + ioe.getMessage());
+		} catch (Exception e) {
+			System.out.println("Exception Error ---> " + e.getMessage());
+		}
+		return conn;
+	}
+
+	/**
+	* Connect to Database via Connection Pool.
+	* @param autoCommit True or False
+	* @return Connection
+	*/
+	private static Connection getConnectionViaPoolICL(boolean autoCommit, String dataSourceName)
+		throws NamingException, SQLException, Exception {
+		DataSource ds = null;
+		Connection conn = null;
+
+		/*
+		* Create the intitial naming context.
+		* The command bean will use the naming
+		* service to get access to a DataSource
+		* object setup using the WebSphere
+		* Administrator's Console
+		*/
+		InitialContext ctx = new InitialContext();
+
+		/*
+		* Get the DataSource Object
+		*/	
+		ds = (DataSource) ctx.lookup(dataSourceName);
+	
+		/*
+		* Log in as the default user
+		*/
+		conn = ds.getConnection();
+		conn.setAutoCommit(autoCommit);
+
+		return conn;
+	}
+
+	/**
+	* Connect to Database via DriverManager.
+	* @param autoCommit True or False
+	* @return Connection
+	*/
+	private static Connection getConnectionViaDriverManagerICL(boolean autoCommit)
+		throws SQLException, Exception {
+		Connection conn = null; 
+
+		try{
+			Class.forName(PccProperties.getResourceString("DBDriverICL"));
+			conn = DriverManager.getConnection(	PccProperties.getResourceString("DatabaseICL"),
+												PccProperties.getResourceString("UserIdICL"),
+												PccProperties.getResourceString("PasswordICL"));
+			conn.setAutoCommit(autoCommit);
+		}catch(Exception e){
+			System.out.println("Connection Error : " + e);
+		}
+		return conn;
+	}
+
+	/**
+	* Connect to Database.
+	* @return Connection
+	*/
+	public static Connection getConnectionICLTEST(boolean autoCommit) {
+		String dataSourceName = null;
+		Connection conn = null;
+		try {
+			/*
+			* Get the DataSource Name
+			*/
+			dataSourceName = PccProperties.getResourceString("DataSourceICLTEST");
+			String pool = PccProperties.getResourceString("Pool");
+			
+			if (pool.compareToIgnoreCase("yes") == 0)
+				conn = getConnectionViaPoolICLTEST(autoCommit, dataSourceName);	
+			else
+				conn = getConnectionViaDriverManagerICLTEST(autoCommit);		
+		} catch (FileNotFoundException fe) {
+			System.out.println("FileNotFoundException while loading Properties : \n" + fe.getMessage());
+		} catch(NamingException ne) {
+			System.out.println("NamingException while looking up DataSource Connection " + dataSourceName + ": \n" + ne.getMessage());
+		} catch (SQLException se) { 
+			System.out.println("SQLExcpetion while getting DB Connection : \n" + se.getMessage());
+		} catch (IOException ioe) {
+			System.out.println("IOException Error ---> " + ioe.getMessage());
+		} catch (Exception e) {
+			System.out.println("Exception Error ---> " + e.getMessage());
+		}
+		return conn;
+	}
+
+	/**
+	* Connect to Database via Connection Pool.
+	* @param autoCommit True or False
+	* @return Connection
+	*/
+	private static Connection getConnectionViaPoolICLTEST(boolean autoCommit, String dataSourceName)
+		throws NamingException, SQLException, Exception {
+		DataSource ds = null;
+		Connection conn = null;
+
+		/*
+		* Create the intitial naming context.
+		* The command bean will use the naming
+		* service to get access to a DataSource
+		* object setup using the WebSphere
+		* Administrator's Console
+		*/
+		InitialContext ctx = new InitialContext();
+
+		/*
+		* Get the DataSource Object
+		*/	
+		ds = (DataSource) ctx.lookup(dataSourceName);
+	
+		/*
+		* Log in as the default user
+		*/
+		conn = ds.getConnection();
+		conn.setAutoCommit(autoCommit);
+
+		return conn;
+	}
+
+	/**
+	* Connect to Database via DriverManager.
+	* @param autoCommit True or False
+	* @return Connection
+	*/
+	private static Connection getConnectionViaDriverManagerICLTEST(boolean autoCommit)
+		throws SQLException, Exception {
+		Connection conn = null; 
+
+		try{
+			Class.forName(PccProperties.getResourceString("DBDriverICLTEST"));
+			conn = DriverManager.getConnection(	PccProperties.getResourceString("DatabaseICLTEST"),
+												PccProperties.getResourceString("UserIdICLTEST"),
+												PccProperties.getResourceString("PasswordICLTEST"));
+			conn.setAutoCommit(autoCommit);
+		}catch(Exception e){
+			System.out.println("Connection Error : " + e);
+		}
+		return conn;
+	}
+}

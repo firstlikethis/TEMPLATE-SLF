@@ -1,0 +1,123 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package SLF_TOOL;
+/*
+import javax.naming.*;
+import java.sql.*;
+//import javax.sql.*;
+import java.util.*;
+import java.io.*;
+import javax.sql.DataSource;
+*/
+
+import java.io.PrintStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.naming.*;
+import javax.sql.DataSource;
+
+/**
+ *
+ * @author TRISORN123
+ */
+public class getOra_DB {
+
+    public static Connection getConnection(boolean autoCommit) throws NamingException, SQLException, Exception {
+
+        Connection conn = null;
+        //DataSource ds = null;
+
+        try {
+
+            //For Tomcat Webserver
+            
+            Context ctx1 = new InitialContext();
+            Context envContext = (Context)ctx1.lookup("java:/comp/env");
+            DataSource ds1 = (DataSource)envContext.lookup("jdbc/SLFORA");
+            conn = ds1.getConnection();
+            conn.setAutoCommit(autoCommit);
+             
+            /*
+             Context ctx1 = new InitialContext();
+             Context envContext = (Context) ctx1.lookup("java:/comp/env");                   
+             javax.sql.DataSource ds1 = (javax.sql.DataSource) envContext.lookup("jdbc/SLFORA");
+             //javax.sql.DataSource ds1 = (javax.sql.DataSource) envContext.lookup("jdbc/SLFERP");
+             //javax.sql.DataSource ds1 = (javax.sql.DataSource) envContext.lookup("jdbc/APPSINTRA");
+                
+             conn=ds1.getConnection();
+             conn.setAutoCommit(autoCommit);*/
+            
+             
+            //For Sunserver
+             /*
+            Context ctx1 = new InitialContext();            
+            DataSource ds1 = null;
+            ds1 = (DataSource) ctx1.lookup("jdbc/SLFORA");
+            //ds1 = (DataSource) ctx1.lookup("jdbc/SLFERPNEW");
+            conn = ds1.getConnection();
+            conn.setAutoCommit(autoCommit);
+            */
+
+            /*888
+             * try { //New connection by JDBC and Connection Pool InitialContext
+             * ctx = new InitialContext(); DataSource ds = (DataSource)
+             * ctx.lookup("jdbc/SLFERP"); conn = ds.getConnection();
+             * conn.setAutoCommit(autoCommit);
+             *
+             * System.out.println("Conection is OK"); } catch (SQLException e) {
+             * System.out.println(e); System.out.println("Connection Failed!
+             * Check output console"); e.printStackTrace(); //return; }
+             */
+
+
+            /*
+             * try { //Old connection by driver
+             * Class.forName("oracle.jdbc.driver.OracleDriver"); //conn =
+             * DriverManager.getConnection("jdbc:oracle:thin:@192.168.100.23:1522:TST",
+             * "apps", "apps1s1"); //Oracle connection conn =
+             * DriverManager.getConnection("jdbc:oracle:thin:@192.168.100.23:1523:UAT",
+             * "apps", "appsua1"); //Oracle connection //conn=
+             * DriverManager.getConnection("jdbc:oracle:thin:@192.168.11.33:1521:HYPSLF",
+             * "slfbi", "welcome1"); //Oracle connection to BI
+             * System.out.println("Check output console"); } catch (SQLException
+             * e) { System.out.println(e); System.out.println("Connection
+             * Failed! Check output console"); e.printStackTrace(); //return; }
+             *
+             */
+
+              /* 
+            try { //Old connection by driver
+                Class.forName("oracle.jdbc.driver.OracleDriver"); 
+                conn = DriverManager.getConnection("jdbc:oracle:thin:@192.168.11.33:1521:HYPSLF", "slfbi", "welcome1");
+                //Oracle connection to BI
+                //conn=DriverManager.getConnection("jdbc:oracle:thin:@192.168.43.4:1521:xe","usrapps","passapps");
+                System.out.println("Check output console1=" + conn);
+            } catch (SQLException e) {
+                System.out.println(e);
+            }*/
+            
+
+        } catch (Exception ee) {
+            System.out.println(ee);
+            System.out.println("Where is your Oracle JDBC Driver?");
+            ee.printStackTrace();
+            //return; 
+        } finally {
+        }
+
+        return conn;
+    }
+
+    public static void main(String args[]) throws Exception {
+        Connection con = null;
+        try {
+            con = getOra_DB.getConnection(false);
+
+            con.close();
+        } catch (Exception e) {
+            System.out.print("err=" + e.toString());
+        }
+    }
+}

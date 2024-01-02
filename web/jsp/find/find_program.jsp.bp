@@ -1,0 +1,146 @@
+<%@ page contentType="text/html; charset=windows-874" language="java" import="java.sql.*" errorPage="" %>
+<%@ page import="com.pccth.utils.*"%>
+<%@page import="SLF_TOOL.*"%>
+<% 
+	request.setCharacterEncoding("windows-874");   //------แก้ปัญหาใช้ภาษาไทยไม่ได้
+
+	String contextPath = request.getContextPath();
+	String txtuniv_name=Tools.chkNull(request.getParameter("txtuniv_name")); 
+	String h_chk=Tools.chkNull(request.getParameter("h_chk")); 	
+	String s1=Tools.chkNull(request.getParameter("s1")); 
+	String HFind=Tools.chkNull(request.getParameter("HFind")); 
+	
+	String sql="", sqland="", sql2="";
+	String bor="", bor1="", gid="";
+	String hMOICODE="";
+	String tTambon="", tAumpor="", tProv="";
+	int i=0;
+	
+	Connection conn = null;	
+	ResultSet rs=null, rs2=null;
+	Statement stmt=null, stmt2=null;	
+	
+    try{
+    	conn = getOra_DB.getConnection(false);
+	
+%>
+
+<html>
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=TIS-620"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">  		
+<link rel="stylesheet" href="<%=contextPath%>/css/bootstrap.css">
+<script src="<%=contextPath%>/jquery-3.1.1.min.js"></script>
+<script src="<%=contextPath%>/js/bootstrap.min.js"></script>
+
+<script>
+	//var formCurrent1=window.opener.document.form1;
+	//document.form1.hh.value=formCurrent1.hminitry.value;
+
+	function FindPwd(){
+		var f1=document.form1;
+		if(f1.txtuniv_name.value!=""){
+			f1.HFind.value="1";		
+			f1.submit();
+		}		
+	}
+	function ClickTable(mpara){
+		var formCurrent=window.opener.document.form1;
+		
+		formCurrent.tProID.value=document.getElementById("A"+mpara).innerText;
+		formCurrent.tProName.value=document.getElementById("B"+mpara).innerText+"   : :   "+document.getElementById("C"+mpara).innerText;;
+		
+		window.opener.Find_Program(); //สร้างเพื่อหลอกโปรแกรมให้ใช้กับหน้าจอ SLFSYS003
+		
+		window.close();
+	}
+	
+</script>
+</head>
+<BR>
+<div class="container">
+<form name="form1" method="post"  action="<%=contextPath%>/jsp/find/find_program.jsp">
+
+						
+<div class="col-sm-12">
+
+				  
+				  
+				  <table width="100%">
+				  <tr>
+				  	<td align="center" bgcolor="#006699"><label><span style="color:#FFFFFF">Program name</span></label></td>
+					<td><input name="txtuniv_name" class="form-control" type="text" id="txtuniv_name" value="<%=txtuniv_name.equals("")?"%":txtuniv_name%>"></td>
+					<td><button class="form-control" onClick="FindPwd();">...</button></td>
+				  </tr>
+				  <tr>
+				    <td align="center" bgcolor="#006699"><label><span style="color:#FFFFFF">Active</span></label></td>
+				    <td colspan="2">
+							<select name="s1" id="s1" class="form-control">
+										<option value="Y" selected>Y</option>
+										<option value="N" <%=s1.equals("N")?"selected":""%>>N</option>								
+							</select>	
+					</td>
+				    </tr>
+				  </table>
+
+			<div class="table-responsive"> 
+					<table cellspacing="2" class="table table-striped table-hover">
+					  <tr>
+						<th><center>No.</center></td>
+						<th><center>
+						    Pro ID 
+						</center></th>
+						<th><center>
+						  Pro name 
+						</center></th>
+						<th>Pro File </th>
+					  </tr>
+						<%		
+						sqland="";
+						if(HFind.equals("1")){	
+							sqland=" and proname like '%"+txtuniv_name+"%' ";	
+						}else{				
+						}
+						//-----------------------------Select Data from slf_institute------------------------------------------------------------	
+						s1=s1.equals("")?"Y":s1;
+						sql="select * from slf_sso.programsys where 1=1  "+sqland+"  and active_flag='"+s1+"' order by proid";
+						
+						stmt = conn.createStatement();
+						rs = stmt.executeQuery(sql);
+						while(rs.next()){	
+							i++;								
+						%>					
+						<tr >
+						  <td align="center" class="<%=bor1%>"><%=Integer.toString(i)%></td>
+						  <td align="center"   id="A<%=Integer.toString(i)%>" onClick="ClickTable('<%=Integer.toString(i)%>');" class="<%=bor1%>"><%=rs.getString("proid")%></td>
+						  <td  align="left"  id="B<%=Integer.toString(i)%>" onClick="ClickTable('<%=Integer.toString(i)%>');"  class="<%=bor1%>"><%=rs.getString("proname")%></td>
+						  <td  align="left"  id="C<%=Integer.toString(i)%>" onClick="ClickTable('<%=Integer.toString(i)%>');"  class="<%=bor1%>"><%=rs.getString("filename")%></td>
+						</tr>			
+						<%
+						}
+						rs.close();	stmt.close();							
+						%>
+					</table>
+				  
+				<input name="HFind" type="hidden" id="HFind">
+				<input name="Huniv_id" type="hidden" id="Huniv_id">
+				<input name="tmp_minitry" type="hidden" id="tmp_minitry" value="<%//=tmp_minitry%>">				
+				<input name="h_chk" type="hidden" id="h_chk" value="<%=h_chk%>">
+			
+	  </div><!-- <div class="table-responsive"> -->
+  </div><!-- <div class="col-sm-12"> -->
+
+</form>
+</div><!-- <div class="container"> -->
+</body>
+</html>
+<%
+}catch (Exception e) { 
+				out.print(e);				
+}finally{				
+				if(rs!=null) rs.close();
+				if(stmt!=null) stmt.close();
+				if(conn!=null) conn.close();
+}	
+%>
